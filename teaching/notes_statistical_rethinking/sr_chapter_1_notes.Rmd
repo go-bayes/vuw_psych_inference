@@ -16,14 +16,15 @@ A few key points in Statistical Rethinking Chapter 1
 ## Golems and Bayes
 * RM points out that statistical tests are "golems" -- little robots -- that will destroy your life, and Prague.
 * These robots work well in some settings, but they are fragile. They fail in spectacular ways.
-* Bayesian data analysis is a golem. However, it has many advantages, one of which is  recovering intuitive probabilities.
+* Bayesian data analysis is a golem. However, it has many advantages, one of which is recovering intuitive probabilities.
 
 ## Statitical Models, Process Models, and Hypotheses
+
   + Models: how does the world work, e.g. a process model of evolution
   + Hypotheses: predictions that models make on observations: 
   + Statistical model: evaluation of a hypothesis: do these observations make a model more probable?  
-  * It is not just statistical tests that may go wrong: 
-    + need to understand the relationship between a process model and its observations
+  + It is not just statistical tests that may go wrong: 
+    * need to understand the relationship between a process model and its observations
     * need to evaluate (and re-evaluate) a statistical model (Note, a hypotheses might be continuous)
     * measurement matters 
   
@@ -31,7 +32,8 @@ A few key points in Statistical Rethinking Chapter 1
 
 Storm clouds on the horizon: causal inference requires causal models: we need to be careful about what we include in our regressions: confounds are lurking.
 
-* Foreshadowing: Key tools at our disposal
+Key tools at our disposal:
+
  1. Bayesian data analysis
  2. Model comparison
  3. Multilevel models
@@ -110,7 +112,7 @@ plot(p)
 ```
 
 
-# Code to install the rethinking package
+# Code for installing the rethinking package
 
 
 ```{r install_rethinking}

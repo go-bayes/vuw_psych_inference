@@ -13,9 +13,9 @@ knitr::opts_chunk$set(echo = FALSE)
 
 A few key points in Statistical Rethinking Chapter 2
 
-##Small worlds and large worlds
+## Small worlds and large worlds
 
-* We want to infer how the world is -- the large world, however observations come from some part of that larger World
+* We want to infer how the world is -- the large world, however observations come from some part of that larger world
 * How to build a model: in the most basic sense, we want to consider ways the world might be that are consistent with our observations. (The garden of forking data)
 
 ## Building a model for the globe toss example. 
@@ -36,7 +36,7 @@ $p \sim Uniform(0,1)$
 
 
 
-This is how RM creates some data. Before we get started here's a pro tip about how to drop scientific notation in R: `r options(scipen=999)`
+This is how RM creates some data. Before we get started here's a tip about how to drop scientific notation in R: `r options(scipen=999)`
 
 
 ```{r}

@@ -421,11 +421,13 @@ summary {
 <div id="highlights-from-chapter-2-in-statistical-rethinking" class="section level1">
 <h1>Highlights from Chapter 2 in Statistical Rethinking</h1>
 <p>A few key points in Statistical Rethinking Chapter 2</p>
-<p>##Small worlds and large worlds</p>
+<div id="small-worlds-and-large-worlds" class="section level2">
+<h2>Small worlds and large worlds</h2>
 <ul>
-<li>We want to infer how the world is – the large world, however observations come from some part of that larger World</li>
+<li>We want to infer how the world is – the large world, however observations come from some part of that larger world</li>
 <li>How to build a model: in the most basic sense, we want to consider ways the world might be that are consistent with our observations. (The garden of forking data)</li>
 </ul>
+</div>
 <div id="building-a-model-for-the-globe-toss-example." class="section level2">
 <h2>Building a model for the globe toss example.</h2>
 <p>First some notation:</p>
@@ -434,7 +436,7 @@ summary {
 <p><span class="math inline">\(W \sim Binomial(N,p)\)</span></p>
 <p>and we assume (here) that p is sampling from a uniform distribution (aka has a uniform range) from zero to 1, which we write as</p>
 <p><span class="math inline">\(p \sim Uniform(0,1)\)</span></p>
-<p>This is how RM creates some data. Before we get started here’s a pro tip about how to drop scientific notation in R:</p>
+<p>This is how RM creates some data. Before we get started here’s a tip about how to drop scientific notation in R:</p>
 <pre><code>## [1] 0.1640625</code></pre>
 <pre><code>##  [1] 0.00000000 0.05263158 0.10526316 0.15789474 0.21052632 0.26315789
 ##  [7] 0.31578947 0.36842105 0.42105263 0.47368421 0.52631579 0.57894737
@@ -490,7 +492,7 @@ summary {
 ## 
 ##     rstudent</code></pre>
 <pre><code>##        mean        sd      5.5%     94.5%
-## p 0.6666667 0.1571338 0.4155365 0.9177968</code></pre>
+## p 0.6666666 0.1571338 0.4155365 0.9177968</code></pre>
 <p>Note: “The quadratic approximation, either with a uniform prior or with a lot of data, is often equivalent to a MAXIMUM LIKELIHOOD ESTIMATE (MLE) and its STANDARD ERROR.”</p>
 <pre><code>##        mean         sd      5.5%     94.5%
 ## p 0.5443747 0.08616263 0.4066701 0.6820792</code></pre>
@@ -515,28 +517,6 @@ summary {
 ## 
 ##     ar</code></pre>
 <pre><code>## Compiling Stan program...</code></pre>
-<pre><code>## Trying to compile a simple C file</code></pre>
-<pre><code>## Running /Library/Frameworks/R.framework/Resources/bin/R CMD SHLIB foo.c
-## clang -I&quot;/Library/Frameworks/R.framework/Resources/include&quot; -DNDEBUG   -I&quot;/Library/Frameworks/R.framework/Versions/4.0/Resources/library/Rcpp/include/&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.0/Resources/library/RcppEigen/include/&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.0/Resources/library/RcppEigen/include/unsupported&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.0/Resources/library/BH/include&quot; -I&quot;/Library/Frameworks/R.framework/Versions/4.0/Resources/library/StanHeaders/include/src/&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.0/Resources/library/StanHeaders/include/&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.0/Resources/library/RcppParallel/include/&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.0/Resources/library/rstan/include&quot; -DEIGEN_NO_DEBUG  -DBOOST_DISABLE_ASSERTS  -DBOOST_PENDING_INTEGER_LOG2_HPP  -DSTAN_THREADS  -DBOOST_NO_AUTO_PTR  -include &#39;/Library/Frameworks/R.framework/Versions/4.0/Resources/library/StanHeaders/include/stan/math/prim/mat/fun/Eigen.hpp&#39;  -D_REENTRANT -DRCPP_PARALLEL_USE_TBB=1   -I/usr/local/include   -fPIC  -Wall -g -O2  -c foo.c -o foo.o
-## In file included from &lt;built-in&gt;:1:
-## In file included from /Library/Frameworks/R.framework/Versions/4.0/Resources/library/StanHeaders/include/stan/math/prim/mat/fun/Eigen.hpp:13:
-## In file included from /Library/Frameworks/R.framework/Versions/4.0/Resources/library/RcppEigen/include/Eigen/Dense:1:
-## In file included from /Library/Frameworks/R.framework/Versions/4.0/Resources/library/RcppEigen/include/Eigen/Core:88:
-## /Library/Frameworks/R.framework/Versions/4.0/Resources/library/RcppEigen/include/Eigen/src/Core/util/Macros.h:613:1: error: unknown type name &#39;namespace&#39;
-## namespace Eigen {
-## ^
-## /Library/Frameworks/R.framework/Versions/4.0/Resources/library/RcppEigen/include/Eigen/src/Core/util/Macros.h:613:16: error: expected &#39;;&#39; after top level declarator
-## namespace Eigen {
-##                ^
-##                ;
-## In file included from &lt;built-in&gt;:1:
-## In file included from /Library/Frameworks/R.framework/Versions/4.0/Resources/library/StanHeaders/include/stan/math/prim/mat/fun/Eigen.hpp:13:
-## In file included from /Library/Frameworks/R.framework/Versions/4.0/Resources/library/RcppEigen/include/Eigen/Dense:1:
-## /Library/Frameworks/R.framework/Versions/4.0/Resources/library/RcppEigen/include/Eigen/Core:96:10: fatal error: &#39;complex&#39; file not found
-## #include &lt;complex&gt;
-##          ^~~~~~~~~
-## 3 errors generated.
-## make: *** [foo.o] Error 1</code></pre>
 <pre><code>## Start sampling</code></pre>
 <pre><code>##  Family: binomial 
 ##   Links: mu = identity 
