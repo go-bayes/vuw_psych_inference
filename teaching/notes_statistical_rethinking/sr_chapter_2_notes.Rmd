@@ -42,28 +42,27 @@ This is how RM creates some data. Before we get started here's a tip about how t
 ```{r}
 options(scipen=999)
 # first play around with the dbinom function in R
+```
 
+```{r}
 dbinom( 6 , size=9, prob = .5 ) # what is the probability of the relative number of ways to get six water, holding p at 0.5 and n = w + l  at 9. 
-
 
 # define grid: this is a vector of 20 points from 0 and 1
 p_grid <- seq( from=0 , to=1 , length.out=20 )
-
-p_grid
+p_grid  # check it
 
 # define prior
 prior <- rep( 1 , 20 )
 
-prior  # 20 1's in a row
+prior  # check it: 20 x 1 in a vector
 
 # compute likelihood at each value in grid # this is how R generates random numbers. Here are random numbers 
-likelihood <- dbinom( 6 , size=9 , prob=p_grid )  # from the chapter, there were six water draws in nine tosses of the globe.  The likelihood is the probability of evidence given the hypothesis.   #Here, we're saying that pr could be anything from 0 to 1 with equal probability.
+likelihood <- dbinom( 6 , size=9 , prob=p_grid )  # from the chapter, there were six water draws in nine tosses of the globe.  The likelihood is the probability of evidence given the hypothesis.  Here, we're saying that pr could be anything from 0 to 1 with equal probability.
 
 likelihood
 
 # compute product of likelihood and prior
 unstd.posterior <- likelihood * prior  # we're taking the likelihood at face value.
-
 unstd.posterior
 
 # standardize the posterior, so it sums to 1
@@ -81,9 +80,7 @@ plot( p_grid , posterior , type="b",
 ```
 
 
-
-
-We are now in the position to change this plot by adjusting our priors:
+Not in the book. Consider what happens if we adjust our priors:
 
 ```{r}
 # here we take any value under five and we assign it a zero for our prior. We know that the world is at least half water
@@ -105,13 +102,6 @@ plot( p_grid , posterior , type="b",
        xlab= "probability of water", 
        ylab="new posterior probability")
 ```
-
-# Questions
-Explain RM's meaning here:
-
-> It is common to hear that there is a minimum number of observations for a useful statistical estimate. For example, there is a widespread superstition that 30 observations are needed before one can use a Gaussian distribution. Why? In non-Bayesian statistical inference, procedures are often justified by the method’s behavior at very large sample sizes, so-called asymptotic behavior. As a result, performance at small samples sizes is questionable.
-In contrast, Bayesian estimates are valid for any sample size. This does not mean that more data isn’t helpful—it certainly is. Rather, the estimates have a clear and valid interpretation, no matter the sample size. But the price for this power is dependency upon the initial plausibilities, the prior. If the prior is a bad one, then the resulting inference will be misleading.
-
 
 
 
@@ -155,9 +145,9 @@ Solomon Kurz's code for replicating the rethinking plots:
 Let's use his code to run a bayesian model in brms: 
 
 
-```{r echo =FALSE}
+```{r echo =FALSE, cache =TRUE}
 # install if you don't have this
-library(brms)
+library("brms")
 # I use these options
 rstan_options(auto_write=TRUE)
 options(mc.cores=parallel::detectCores ()) # this runs all the cores on your machine
@@ -192,7 +182,7 @@ library("performance")
 parameters::model_parameters(m3)
 ```
 
-Here's a some code from the Kurz boook
+Here's a some code from the Kurz book.  Here's how you can create a "tibble" or a fancy dataframe. 
 
 
 ```{r}
@@ -230,6 +220,7 @@ d %>%
   theme(legend.position = "none")
 ```
 
+You can follow the rest of Solomon's work for creating graphs of the kind in SR. 
 
 
 You can do the rest of the graph at your own leasure. I just wanted to show you how to make a "tibble." Later on, methods like this will be useful for creating simulated datasets. 

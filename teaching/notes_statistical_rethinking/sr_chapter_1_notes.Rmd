@@ -2,7 +2,9 @@
 title: "sr_chapter_1_notes"
 author: "Joseph Bulbulia"
 date: "01/12/2020"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -28,7 +30,7 @@ A few key points in Statistical Rethinking Chapter 1
     * need to evaluate (and re-evaluate) a statistical model (Note, a hypotheses might be continuous)
     * measurement matters 
   
-##Practical Advice
+##  Practical Advice
 
 Storm clouds on the horizon: causal inference requires causal models: we need to be careful about what we include in our regressions: confounds are lurking.
 

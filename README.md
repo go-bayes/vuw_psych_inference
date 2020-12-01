@@ -1,3 +1,10 @@
+---
+title: "README"
+author: "Joseph Bulbulia"
+date: "01/12/2020"
+output: html_document
+---
+
 # vuw_psych_inference
 Materials related to teaching undergraduate and graduate statistics.
 
