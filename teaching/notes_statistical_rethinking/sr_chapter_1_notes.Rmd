@@ -1,0 +1,144 @@
+---
+title: "sr_chapter_1_notes"
+author: "Joseph Bulbulia"
+date: "01/12/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# Highlights from Chapter 1 in Statistical Rethinking
+
+A few key points in Statistical Rethinking Chapter 1
+
+## Golems and Bayes
+* RM points out that statistical tests are "golems" -- little robots -- that will destroy your life, and Prague.
+* These robots work well in some settings, but they are fragile. They fail in spectacular ways.
+* Bayesian data analysis is a golem. However, it has many advantages, one of which is  recovering intuitive probabilities.
+
+## Statitical Models, Process Models, and Hypotheses
+  + Models: how does the world work, e.g. a process model of evolution
+  + Hypotheses: predictions that models make on observations: 
+  + Statistical model: evaluation of a hypothesis: do these observations make a model more probable?  
+  * It is not just statistical tests that may go wrong: 
+    + need to understand the relationship between a process model and its observations
+    * need to evaluate (and re-evaluate) a statistical model (Note, a hypotheses might be continuous)
+    * measurement matters 
+  
+##Practical Advice
+
+Storm clouds on the horizon: causal inference requires causal models: we need to be careful about what we include in our regressions: confounds are lurking.
+
+* Foreshadowing: Key tools at our disposal
+ 1. Bayesian data analysis
+ 2. Model comparison
+ 3. Multilevel models
+ 4. Graphical causal models
+
+
+# Questions
+
+* What does RM think is wrong about classical statistical instruction? 
+* What does RM think is OK about classical statistical instruction? 
+* What is the advantage of Bayesian data analysis
+* How do multilevel models deal with variation. 
+
+
+  
+# Practicalities (not in the book)
+
+
+```{r}
+# comments will help you, and others, following your statistical reasoning
+# here we load data
+data(cars)
+
+# I like to inspect any data that I load
+str(cars)
+head(cars)
+
+# here's a basic model
+m <- lm( dist ~ speed , data=cars )
+summary(m)
+```
+
+
+Let's obtain some extra packages that will make reporting useful for you. 
+```{r}
+# tip of the day; many packages make reporting easy. For example the sjPlot package
+
+# you need the devtools library. in Rstudio click "packages --> install --> devtools"
+
+if (!require(devtools)) {
+  install.packages("devtools")
+}
+if (!require(sjPlot)) {
+ devtools::install_github("strengejacke/sjPlot")
+}
+
+if (!require(ggeffects)) {
+ install.packages("ggeffects")
+}
+
+if (!require(ggplot2)) {
+ install.packages("ggplot2")
+}
+
+```
+
+Here's a nicely formatted table
+
+```{r table_model_m}
+# table for the model
+tab_model(m)
+```
+
+Here's a coefficient plot for the model, notice how I have customised it
+
+```{r coefficientplot_model_m}
+sjPlot::plot_model(m) + ggtitle("Relationship of speed to distance")
+```
+
+
+Here's a prediction plot
+
+```{r prediction_plot}
+p <- ggpredict(m)
+plot(p) 
+```
+
+
+# Code to install the rethinking package
+
+
+```{r install_rethinking}
+# function for installing dependencies
+ipak <- function(pkg){
+new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
+if (length(new.pkg)) 
+    install.packages(new.pkg, dependencies = TRUE)
+sapply(pkg, require, character.only = TRUE)
+}
+
+# usage
+packages <- c("coda", "plyr", "mvtnorm", "scales", "dagitty")
+ipak(packages)
+
+# next install rethinking
+if (!require(rethinking)) {
+  devtools::install_github("rmcelreath/rethinking")
+}
+
+```
+
+
+
+
+
+
+
+
+
+
