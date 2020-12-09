@@ -1,0 +1,187 @@
+---
+title: "SR Chapter 3 Notes"
+author: "Joseph Bulbulia"
+date: "09/12/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Vampire example -- tweaked.
+
+Suppose there is a test that is 99% accurate at detecting COVID if you have it. 
+
+Very rarely it throws up a false positive,say one in a thousand. 
+
+You just tested positve.  What is the probability that you have COVID? 
+Our intuition is that we probably have COVID. However, let's assume COVID is rare. Currently in NZ, there are about 50 cases, so 1 in 100,000.  The background rate matters. 
+
+Bayes rule says
+
+\[ Pr(COVID|Positive) = \frac{Pr(Positive|COVID)\times Pr (COVID}{Pr(Positive)}
+\]
+
+We plug in the numbers
+
+```{r}
+Pr_Positive_COVID <- 0.99
+Pr_Positive_Healthy <- 0.01
+Pr_COVID <- 0.00001
+
+# Calculate the background probability of testing positive
+Pr_Positive <- Pr_Positive_COVID * Pr_COVID +
+Pr_Positive_Healthy * ( 1 - Pr_COVID )
+
+## Point of chapter
+
+# Now calculated your probability of testing positive
+Pr_COVID_Positive <- Pr_Positive_COVID * Pr_COVID / Pr_Positive 
+Pr_COVID_Positive
+```
+
+Note that this is *counting*: how many instances of x do we expect to find when sampling from y, under certain assumptions and observations of x. 
+
+This chapter teaches some basic skills in working with posterior distributions... updated probabilities of the kind we just produced in the above example. 
+
+## Sampling from a grid-appoximate posteror
+
+
+```{r}
+p_grid <- seq( from=0 , to=1 , length.out=1000 ) # recall that's a vector from 0 to 1 in 1000 increments
+prob_p <- rep( 1 , 1000 ) # repeating 1 x 1000 times  given all observations equal weight
+prob_data <- dbinom( 6 , size=9 , prob=p_grid ) # probability of observing 6 W and 3 L summed accross all the probabilities we just created
+posterior <- prob_data * prob_p
+
+posterior <- posterior / sum(posterior)
+
+# and now we want to sample 10000 draw from this posterior
+samples <- sample( p_grid , prob=posterior , size=10000 , replace=TRUE )
+
+# and here we plot the draws
+plot(samples)
+```
+
+
+RM also includes some code from the rethinking package to plot the density of this sample
+
+```{r}
+library(rethinking)
+dens( samples )
+```
+
+
+This estimated density is close the the computed grid approximation. 
+
+Key quotation 
+
+> Once your model produces a posterior distribution, the model’s work is done. But your work has just begun. It is necessary to summarize and interpret the posterior distribution. Exactly how it is summarized depends upon your purpose. But common questions include.
+
+## Ways of summarising
+
+Add up the probability where the parameter (water on the globe) is less than .5
+
+```{r}
+sum( posterior[ p_grid < 0.5 ] )
+```
+
+Lets try the estimation. This is just counting from the posterior samples. 
+
+
+```{r}
+sum( samples < 0.5 ) / 10000
+```
+
+We get something very close. 
+
+
+Next, how much of the posterior sample is between .5 and .7? 
+
+
+```{r}
+sum( samples > 0.5 & samples < 0.75 ) / 1e4
+```
+
+## Intervals
+
+When you are reporting your results you'll likely be using a "credibility interval" (which differs from a "confidence interval") by the concept is similar. Both are intervals of defined mass.  RM call this a "Compatibility Interval"  because we might not have much confidence or credibility.  
+
+In any event, we can work with R's "quantile" function to find a percentile range of interest
+
+
+```{r}
+quantile (samples , .8)
+```
+
+Or we can inspect a "percentile interval" 
+```{r}
+quantile (samples , c(.1 ,  .9) )
+```
+
+
+RM invites us to consider observing three waters in three tosses. 
+
+
+```{r}
+p_grid <- seq( from=0 , to=1 , length.out=1000 )
+prior <- rep(1,1000)
+likelihood <- dbinom( 3 , size=3 , prob=p_grid )
+posterior <- likelihood * prior
+posterior <- posterior / sum(posterior)
+samples <- sample( p_grid , size=1e4 , replace=TRUE , prob=posterior )
+```
+
+Now we inspect the interval
+
+
+```{r}
+quantile (samples , c(.1 ,  .9) )
+# or you can use rethinking's PI (sample, prob =.05 )
+```
+
+This is weird because the interval excludes the most probable parameters which are near 1. The interval assigns equal mass (25%) to both the left and right tail, and so omits the most probably parameter probabilities 
+ 
+For this reason, we might prefer the "Highest Posterior Density Interval" or HPDI, which is the narrowist region with 50% of the probability in it, and always includes the most probable parameter. 
+
+The rethinking package will compute this from the samples using the `HPDI` call:
+
+```{r}
+HPDI( samples, prob = .5)
+```
+
+
+
+Mostly, though, CI and HPDI's are the ~ the same.
+
+What about point estimates? 
+
+
+
+Or if we sample from the posterior
+
+```{r}
+mean (samples)
+median (samples)
+```
+
+Note these are different, which to use? 
+
+You can calculate the expected loss for different decisions. 
+
+## Loss function
+
+We compute the weighted average loss
+
+```{r}
+sum( posterior*abs( 0.5 - p_grid ) )
+```
+
+```{r}
+loss <- sapply( p_grid , function(d) sum( posterior*abs( d - p_grid ) ) )
+p_grid[ which.min(loss) ]
+```
+
+
+This is the posterior median. (Half the density is above the mean and half is below it.)
