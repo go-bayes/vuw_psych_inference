@@ -185,3 +185,120 @@ p_grid[ which.min(loss) ]
 
 
 This is the posterior median. (Half the density is above the mean and half is below it.)
+
+
+# Simulation
+
+
+Difference between `dbinom` and `rbinom` 
+
+
+What does this say? 
+```{r}
+dbinom( 0:2 , size=2 , prob = 0.7 )
+```
+
+
+First slot = number of observations of water
+Second slow = number of tosses of the globe
+
+Possible observations are therefore 
+0 water
+1 water 
+2 water
+
+What is the prob of these observations of the actual coverage of water on earth is .7 of the planet?  The above recovers that probability.
+
+
+
+Next onto rbinom. 
+
+What does this say? 
+
+```{r}
+rbinom( 1 , size=2 , prob = 0.7 )
+```
+
+
+It generates a coin flip of of 1 water in 2 tosses with probability .7.
+
+Try repeating that call several times
+
+
+What does this do? 
+
+```{r}
+rbinom( 10 , size=2 , prob = 0.7 )
+```
+
+We can generate 100,000
+
+```{r}
+dummy_w <- rbinom( 1e5 , size=2 , prob=0.7 )
+table(dummy_w)
+# or the proportion
+table(dummy_w)/1e5
+```
+
+
+This is the distribution of simulated samples. 
+
+
+Return to the previous example. 
+
+
+```{r}
+dummy_w <- rbinom( 1e5 , size=9 , prob=0.7 )
+table(dummy_w)/1e5
+rethinking::simplehist( dummy_w , xlab= 'dummy water count' )
+```
+
+
+
+So now we know how to generate a distribution.  Nice. 
+
+
+Key quotation:
+
+> The goal is not to test whether the model’s assumptions are “true,” because all models are false.  Rather, the goal is to assess exactly how the model fails to describe the data, as a path towards model comprehension, revision, and improvement.
+
+This is cryptic, but fundamental. The way we're going to understand how models fail is by combining simulated and observed distributions.
+
+
+Go back to the previous model where we generated samples:
+
+```{r}
+p_grid <- seq( from=0 , to=1 , length.out=1000 )
+prob_p <- rep( 1 , 1000 )
+prob_data <- dbinom( 6 , size=9 , prob=p_grid )
+posterior <- prob_data * prob_p
+posterior <- posterior / sum(posterior)
+samples <- sample( p_grid , prob=posterior , size=1e4 , replace=TRUE )
+```
+
+
+First try this
+```{r}
+w <- rbinom( 1e4 , size=9 , prob=0.6 )
+table(w)/1e4
+```
+
+
+How is this different? 
+
+```{r}
+w2 <- rbinom( 1e4 , size=9 , prob=samples )
+table(w2)/1e4
+```
+
+
+
+
+
+
+
+
+
+
+
+
