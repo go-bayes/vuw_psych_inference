@@ -5,7 +5,7 @@ date: "01/12/2020"
 output: html_document
 ---
   
-  ```{r setup, include=FALSE}
+```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
@@ -179,7 +179,7 @@ parameters::model_parameters(m3)
 Now some plots
 ```{r}
 library("performance")
-parameters::model_parameters(m3)
+plot(parameters::model_parameters(m3))
 ```
 
 Here's a some code from the Kurz book.  Here's how you can create a "tibble" or a fancy dataframe. 
@@ -196,7 +196,6 @@ d <-
          p_3 = rep(1:0, times = c(2, 2)),
          p_4 = rep(1:0, times = c(3, 1)),
          p_5 = 1)
-
 head(d)
 ```
 
