@@ -1,10 +1,7 @@
 #libs
 # libraries
 
-
 library("rethinking")
-
-# dags
 library("dagitty")
 library("ggdag")
 
