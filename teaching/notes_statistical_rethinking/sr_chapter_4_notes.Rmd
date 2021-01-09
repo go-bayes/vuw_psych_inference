@@ -1,0 +1,78 @@
+---
+title: "Statistical Rethinking | Notes for Chapter 4"
+author: "Joseph Bulbulia"
+date: "09/01/2021"
+output:
+  ioslides_presentation:
+    incremental: no
+   # mathjax: local
+    self_contained: false
+    widescreen: yes
+    smaller: yes
+    font_adjustment: -1
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r global_options,  include = FALSE}
+knitr::opts_chunk$set(message=FALSE, 
+                      warning=FALSE,
+                      collapse =TRUE,
+                      echo=FALSE)
+                      #results="hide", 
+                     # fig.width = 10,
+                     # fig.height=8)
+# read libraries
+```
+```{r sourcelibraries, include=FALSE}
+source("libs.R")
+#source("funs.R") # custom functions for analysis
+```
+## Recap
+- Chapter 3  Generate samples from "quap" and usuing them to create data summaries.  
+
+## Overview
+
+- introduction to the gaussian distribution 
+
+- a language for describing models
+
+- using this langauge to write a model
+  - writing priors 
+  - writing a model (using priors)
+
+- linear regression * 
+
+- nonlinear regression 
+
+<div class="notes">
+* our focus today = linear regression
+</div>
+
+## language for describing models
+
+$$y_i \sim Normal ( mu_i, \sigma)\\
+\mu_i \sim \beta x_i \\
+\beta \sim Normal(0,10) \\
+\sigma \sim Exponentional (1) \\
+x_i \sim Normal (0, 1)
+$$
+
+
+
+## Howell's height data
+
+```{r howell, include=FALSE}
+# data from rethinking
+data( Howell1 )
+
+# assig data to object `d`
+d <- Howell1
+
+# filter ages greater than 18
+d2 <- d[ d$age >= 18 , ]
+```
+
+# Langauge
