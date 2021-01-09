@@ -12,15 +12,12 @@ output:
     font_adjustment: -1
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
-```
 
 ```{r global_options,  include = FALSE}
 knitr::opts_chunk$set(message=FALSE, 
                       warning=FALSE,
                       collapse =TRUE,
-                      echo=FALSE)
+                      echo=TRUE)
                       #results="hide", 
                      # fig.width = 10,
                      # fig.height=8)
@@ -48,12 +45,12 @@ source("libs.R")
 - nonlinear regression 
 
 <div class="notes">
-* our focus today = linear regression
+*our focus today = linear regression
 </div>
 
 ## language for describing models
 
-$$y_i \sim Normal ( mu_i, \sigma)\\
+$$y_i \sim Normal ( \mu_i, \sigma)\\
 \mu_i \sim \beta x_i \\
 \beta \sim Normal(0,10) \\
 \sigma \sim Exponentional (1) \\
@@ -62,9 +59,52 @@ $$
 
 
 
-## Howell's height data
 
-```{r howell, include=FALSE}
+## What should we expect height to be?  
+
+> In most cases, priors are specified independently for each parameter, which amounts to assuming 
+
+$$\Pr(\mu,\sigma) = \Pr(\mu)\Pr(\sigma)$$
+
+i.e. we will have priors for *both* the mean and the standard deviation 
+
+## Prior for height
+```{r}
+curve( dnorm( x , 178 , 20 ) , from=100 , to=250 )
+```
+
+## Prior for Standard Deviation \ (contrained to be postive)
+
+```{r}
+curve( dunif( x , 0 , 50 ) , from=-10 , to=60 )
+```
+
+## Let's generate samples
+
+```{r}
+sample_mu <- rnorm( 1e4 , 178 , 20 ) # prior on avg height
+sample_sigma <- runif( 1e4 , 0 , 50 ) # prior on standard deviation
+prior_h <- rnorm( 1e4 , sample_mu , sample_sigma ) # generate the prior for height
+dens( prior_h )
+```
+
+## Here are some thoughtless samples
+```{r}
+sample_mu <- rnorm( 1e4 , 150 , 1000 ) # prior on avg height
+sample_sigma <- runif( 1e4 , 0 , 1000 ) # prior on standard deviation
+prior_h <- rnorm( 1e4 , sample_mu , sample_sigma ) # generate the prior for height
+dens( prior_h )
+```
+<div class="notes">
+We don't think height should be like this.
+</div>
+
+
+
+## Load Howell's height data
+
+data
+```{r howell, include=TRUE}
 # data from rethinking
 data( Howell1 )
 
@@ -75,4 +115,253 @@ d <- Howell1
 d2 <- d[ d$age >= 18 , ]
 ```
 
-# Langauge
+
+## Graph of heigh ~ weight
+```{r howellgraph}
+plot( d2$height ~ d2$weight )
+```
+
+
+## translation of model into code
+<div class="columns-2">
+$$h_i \sim Normal(\mu, \sigma) $$
+$$\mu \sim  Normal(170,20)$$
+$$\sigma \sim Uniform (0,50) $$
+
+
+
+
+-  `height ~ dnorm( mu, sigma ) ` 
+-  `mu ~ dnorm( 178, 20 )`
+-  `sigma ~ dunif( 0, 50 )`
+
+## Model
+<div class="columns-2">
+Model
+```{r}
+flist <- alist(
+  height ~ dnorm( mu , sigma ) ,
+  mu ~ dnorm( 178 , 20 ) ,
+  sigma ~ dunif( 0 , 50 )
+)
+
+# model
+m4.1<- quap( flist , data=d2 )
+```
+
+Summary
+```{r}
+rethinking::precis( m4.1)
+```
+
+## Try with initalised starting values
+<div class="columns-2">
+
+Model with start
+```{r}
+start <- list(
+  mu=mean(d2$height),
+  sigma=sd(d2$height)
+)
+m4.1<- quap( flist , data=d2 )
+```
+
+
+Summary
+```{r}
+rethinking::precis( m4.1)
+```
+
+## Linear Regression 
+
+-  `height ~ dnorm( mu, sigma )  [likelihood]` 
+-  `mu <- alpha + beta(x_i - xbar) [so called 'linear" model]`
+-  `alpha ~ dnorm( 178, 20 ) [alpha prior]`
+-  `beta ~ Normal ( 0 , 10) [beta prior]`
+-  `sigma ~ dunif( 0, 50 ) [sima prior]`
+
+## Simulate prior
+
+```{r}
+set.seed(2971)
+N <- 100 # 100 lines
+a <- rnorm(N , 178 , 20)
+b <- rnorm(N , 0 , 10)
+# average height
+xbar <- mean(d2$weight)
+
+# clear plot
+dev.off()
+#set up plot
+plot(
+  NULL ,
+  xlim = range(d2$weight) ,
+  ylim = c(-100, 400) ,
+  xlab = "weight" ,
+  ylab = "height"
+)
+abline(h = 0 , lty = 2)
+abline(h = 272 , lty = 1 , lwd = 0.5)
+mtext("b ~ dnorm(0,10)")
+
+# plot lines
+for (i in 1:N)
+  curve(
+    a[i] + b[i] * (x - xbar) ,
+    from = min(d2$weight) ,
+    to = max(d2$weight) ,
+    add = TRUE ,
+    col = col.alpha("black", 0.2)
+  )
+```
+# Try same with sensible prio
+<div class="columns-2">
+
+```{r}
+b <- rlnorm( 1e4 , 0 ,1)
+dens( b , xlim=c(0,5) , adj=0.1 )
+```
+
+
+
+```{r}
+dev.off()
+#set up plot
+plot(
+  NULL ,
+  xlim = range(d2$weight) ,
+  ylim = c(-100, 400) ,
+  xlab = "weight" ,
+  ylab = "height"
+)
+abline(h = 0 , lty = 2)
+abline(h = 272 , lty = 1 , lwd = 0.5)
+mtext("b ~ dnorm(0,10)")
+
+# plot lines
+b <- rlnorm( 1e4 , 0 ,1)
+for (i in 1:N)
+  curve(
+    a[i] + b[i] * (x - xbar) ,
+    from = min(d2$weight) ,
+    to = max(d2$weight) ,
+    add = TRUE ,
+    col = col.alpha("black", 0.2)
+  )
+
+```
+
+## Now we fit the regression model
+
+```{r}
+data(Howell1)
+d <- Howell1
+d2 <- d[d$age >= 18 , ]
+
+# define the average weight, x-bar
+xbar <- mean(d2$weight)
+
+# fit model
+m4.3 <- quap(alist(
+  height ~ dnorm(mu , sigma) ,
+  mu <- a + b * (weight - xbar) ,
+  a ~ dnorm(178 , 20) ,
+  b ~ dlnorm(0 , 1) ,
+  sigma ~ dunif(0 , 50)
+) ,
+data = d2)
+precis(m4.3)
+```
+
+# plot
+
+```{r}
+plot(height ~ weight , data = d2 , col = rangi2)
+post <- extract.samples(m4.3)
+
+a_map <- mean(post$a)
+b_map <- mean(post$b)
+curve(a_map + b_map * (x - xbar) , add = TRUE)
+```
+
+## Uncertainty Graph | extract samples from the model 
+
+```{r}
+N <- 10
+dN <- d2[1:N ,]
+
+mN <- quap(alist(
+  height ~ dnorm(mu , sigma) ,
+  mu <- a + b * (weight - mean(weight)) ,
+  a ~ dnorm(178 , 20) ,
+  b ~ dlnorm(0 , 1) ,
+  sigma ~ dunif(0 , 50)
+) ,
+data = dN)
+
+#extract 20 samples from the posterior
+post <- extract.samples(mN , n = 20)
+```
+
+## display raw data and sample size
+
+```{r}
+plot(
+  dN$weight ,
+  dN$height ,
+  xlim = range(d2$weight) ,
+  ylim = range(d2$height) ,
+  col = rangi2 ,
+  xlab = "weight" ,
+  ylab = "height"
+)
+mtext(concat("N = ", N))
+
+for (i in 1:20)
+  curve(post$a[i] + post$b[i] * (x - mean(dN$weight)) ,
+        col = col.alpha("black", 0.3) ,
+        add = TRUE)
+```
+
+
+## Graph of expected mean at a certain value
+
+Mean at certain value
+```{r}
+post <- extract.samples( m4.3 )
+mu_at_50 <- post$a + post$b * (50 - xbar)
+dens (mu_at_50, xlab = "mu|weight = 50", col = "CadetBlue4") # for base R colors see: http://www.sthda.com/english/wiki/colors-in-r
+```
+
+## Calculate HPDI
+```{r}
+PI(mu_at_50, prob = 0.89)
+```
+
+## Shortcut for computing means for each case: `link`
+
+```{r}
+mu_0 <- link(m4.3)  # just those in dataset
+
+# get a seq of weigts for predictions
+
+weight.seq <-
+  seq(from = 25, to = 70, by = 1) # hypothetical population
+
+mu <- link(m4.3, data = data.frame(weight = weight.seq))
+
+# use type = 'n' to hide raw data
+dev.off()
+plot (height ~ weight, d2, type = "n")
+
+for ( i in 1:100)
+  points(
+    weight.seq, mu[i,], 
+    pch = 16, 
+    col = col.alpha(rangi2, 0.1))
+```
+
+
+
+
+
