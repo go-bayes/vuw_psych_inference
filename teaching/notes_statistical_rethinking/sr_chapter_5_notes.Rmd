@@ -1,0 +1,35 @@
+---
+title: "Statistical Rethinking | Chapter 5"
+author: "Joseph Bulbulia"
+date: "10/01/2021"
+
+output:
+  ioslides_presentation:
+    incremental: no
+   # mathjax: local
+    self_contained: false
+    widescreen: yes
+    smaller: yes
+    font_adjustment: -5
+    css: extra.css
+editor_options: 
+    markdown: 
+    wrap: 72
+---
+
+
+```{r global_options,  include = FALSE}
+knitr::opts_chunk$set(message=FALSE, 
+                      warning=FALSE,
+                      collapse =TRUE,
+                      echo=TRUE)
+                      #results="hide", 
+                     # fig.width = 10,
+                     # fig.height=8)
+# read libraries
+```
+```{r sourcelibraries, include=FALSE}
+source("libs.R")
+#source("funs.R") # custom functions for analysis
+```
+
