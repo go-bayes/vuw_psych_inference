@@ -249,7 +249,8 @@ d2 <- d[ d$age >= 18 , ]
 # define the average weight, x-bar
 xbar <- mean(d2$weight)
 # fit model
-m4.3 <- quap(alist(
+m4.3 <- quap(
+  alist(
   height ~ dnorm(mu , sigma) ,
   mu <- a + b * (weight - xbar) ,
   a ~ dnorm(178 , 20) ,
@@ -390,6 +391,85 @@ shade( height.PI , weight.seq )
 ```
 
 
-## We'll hold off on non-linear regression until later, but skim chapter
+## Interation 
+
+<div class="columns-2">
+$$
+h_i \sim Normal(\mu_i, \sigma) 
+$$
+$$
+\mu_i = \alpha + \beta_1 x_i + \beta_2 x_i^2
+$$
+
+$$
+\alpha \sim Normal(178,20)
+$$
+$$
+\beta_1 \sim LogNormal(0,1)
+$$
+$$
+\beta_2 \sim Normal(0,1)
+$$
+
+$$
+\mu \sim  Normal(170,20)
+$$
+$$
+\sigma \sim Uniform (0,50)
+$$
+
+
+- `height ~ dnorm( mu, sigma ) `
+- `mu = a + b1 * weight_s + b2 * weight_s^2`
+-  `a ~ dnorm( 178, 20 )`
+- `b ~ dlnorm( 0, 1 )`
+- `b2 ~ norm( 0, 1)`
+- `sigma ~ dunif( 0, 50 )`
+
+## Model
+
+```{r}
+data(Howell1)
+d <- Howell1 # note using all age data here not just over 18
+d$weight_s = scale(d$weight)
+d$weight_s2 = d$weight_s ^ 2
+
+m4.5 <- quap(
+  alist(
+    height ~ dnorm(mu , sigma) ,
+    mu <- a + b1 * weight_s + b2 * weight_s2 ,
+    a ~ dnorm(178 , 20) ,
+    b1 ~ dlnorm(0 , 1) ,
+    b2 ~ dnorm(0 , 1) ,
+    sigma ~ dunif(0 , 50)
+  ) ,
+  data = d
+)
+```
+
+## summary
+
+```{r}
+precis(m4.5)
+```
+
+## plot
+```{r echo = FALSE}
+weight.seq <- seq( from=-2.2 , to=2 , length.out=30 )
+pred_dat <- list( weight_s=weight.seq , weight_s2=weight.seq^2 )
+mu <- link( m4.5 , data=pred_dat )
+mu.mean <- apply( mu , 2 , mean )
+mu.PI <- apply( mu , 2 , PI , prob=0.89 )
+sim.height <- sim( m4.5 , data=pred_dat )
+height.PI <- apply( sim.height , 2 , PI , prob=0.89 )
+
+plot( height ~ weight_s , d , col=col.alpha(rangi2,0.5) )
+lines( weight.seq , mu.mean )
+shade( mu.PI , weight.seq )
+shade( height.PI , weight.seq )
+```
+
+
+## We'll hold off on splines for now, but skim chapter
 
 TBC
