@@ -33,22 +33,26 @@ source("libs.R")
 ```
 
 
-## Recap
-- Chapter 3  Generate samples from "quap" and usuing them to create data summaries.  
+<!-- ## Recap -->
+<!-- - Chapter 3  Generate samples from "quap" and usuing them to create data summaries.   -->
 
 ## Overview
 
-- introduction to the gaussian distribution 
+- Introduction to the Gaussian distribution -- not covering this.
 
-- a language for describing models
+- A language for describing models -- important!
 
 - using this langauge to write a model
   - writing priors 
   - writing a model (using priors)
 
-- linear regression * 
+- linear regression * most of our focus
 
 - nonlinear regression 
+
+<div class="notes">
+Once you learn the language for models, your thinking about statistical inference will become much clearer.
+</div>
 
 <!-- <div class="notes"> -->
 <!-- *our focus today = linear regression -->
@@ -122,6 +126,13 @@ d2 <- d[ d$age >= 18 , ]
 
 
 
+## Graph of heigh ~ weight
+```{r howellgraph}
+plot( d2$height ~ d2$weight )
+```
+
+
+
 ## translation of model into code
 <div class="columns-2">
 $$
@@ -141,12 +152,6 @@ $$
 -  `mu ~ dnorm( 178, 20 )`
 -  `sigma ~ dunif( 0, 50 )`
 
-
-
-## Graph of heigh ~ weight
-```{r howellgraph}
-plot( d2$height ~ d2$weight )
-```
 
 ## Model
 <div class="columns-2">
@@ -181,7 +186,7 @@ m4.1<- quap( flist , data=d2 )
 
 Summary
 ```{r}
-rethinking::precis( m4.1)
+rethinking::precis( m4.1 )
 ```
 
 ## Linear Regression 
