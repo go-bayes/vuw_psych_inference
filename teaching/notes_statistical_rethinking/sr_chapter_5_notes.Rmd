@@ -33,3 +33,102 @@ source("libs.R")
 #source("funs.R") # custom functions for analysis
 ```
 
+## Multiple regression, why? 
+
+1. "control" i.e. confounding
+2. complex causation (mediation)
+3. interactions -- inportance of one var depends on another
+
+
+## Dag
+
+
+library(dagitty)
+library(ggdag)
+ 
+# obtain dag
+tidy_ggdag <- dagify(
+  S ~ Psycho + Age + Male + Edu + JobTime + Years,
+  Psycho ~ Male,
+  JobTime ~ Age + Years,
+  Edu ~ Years,
+  exposure =  "Years",
+  outcome =   "S")%>%
+  tidy_dagitty()
+ 
+ggdag::ggdag_dseparated(tidy_ggdag, controlling_for = c("Psycho", "Age", "Male", "Edu", "JobTime")) + theme_dag_blank()
+ 
+# graph adjustment sets
+ggdag::ggdag_adjustment_set(tidy_ggdag, node_size = 14) +
+  theme(legend.position = "bottom")  + theme_dag_blank()
+ 
+# See: https://ggdag.malco.io/articles/bias-structures.html
+
+
+y_effect(x = "Psycho", y = "Diabetes", a = "Income during Childhood", 
+       b = "Genetic Risk \nfor Diabetes", m = "Mother's Diabetes") %>% 
+  ggdag(use_labels = "label")
+
+
+
+## Try mediation
+
+dag0 <- collider_triangle(x = "Years", 
+                  y = "Success", 
+                  m = "Pscyhopath") 
+
+
+ggdag(dag0, text = FALSE, use_labels = "label")
+
+
+
+```{r}
+
+dagify(
+  Success ~ Psycho + Age + Male + Edu + JobTime + Years,
+  Psycho ~ Male,
+  JobTime ~ Age + Years,
+  Edu ~ Years,
+  labels = c(
+    "Psycho" = "Psychopathy",
+    "Success" = "Success",
+    "Age" = "Age",
+    "Male" = "Male",
+    "Edu" = "Edu",
+    "JobTime" = "JobTime",
+    "Years" = "Years"
+  )
+) %>%
+  ggdag_dseparated(
+    from = "Years",
+    to = "Success",
+    controlling_for = c( "Psycho",  "Age",  "Male",  "Edu" , "JobTime"), 
+    text = FALSE,
+    use_labels = "label"
+  ) + theme_dag_blank()
+
+```
+
+dagify(
+  Success ~ Psycho + Age + Male + Edu + JobTime + Years,
+  Psycho ~ Male,
+  JobTime ~ Age + Years,
+  Edu ~ Years,
+  labels = c(
+    "Psycho" = "Psychopathy",
+    "Success" = "Success",
+    "Age" = "Age",
+    "Male" = "Male",
+    "Edu" = "Edu",
+    "JobTime" = "JobTime",
+    "Years" = "Years"
+  )
+) %>%
+  ggdag_dseparated(
+    from = "Years",
+    to = "Success",
+    controlling_for = c( "Psycho",  "Age",  "Male",  "Edu" , "JobTime"), 
+    text = FALSE,
+    use_labels = "label"
+  ) + theme_dag_blank()
+
