@@ -37,98 +37,125 @@ source("libs.R")
 
 1. "control" i.e. confounding
 2. complex causation (mediation)
-3. interactions -- inportance of one var depends on another
+3. interactions -- importance of one var depends on another var
 
 
-## Dag
-
-
-library(dagitty)
-library(ggdag)
- 
-# obtain dag
-tidy_ggdag <- dagify(
-  S ~ Psycho + Age + Male + Edu + JobTime + Years,
-  Psycho ~ Male,
-  JobTime ~ Age + Years,
-  Edu ~ Years,
-  exposure =  "Years",
-  outcome =   "S")%>%
-  tidy_dagitty()
- 
-ggdag::ggdag_dseparated(tidy_ggdag, controlling_for = c("Psycho", "Age", "Male", "Edu", "JobTime")) + theme_dag_blank()
- 
-# graph adjustment sets
-ggdag::ggdag_adjustment_set(tidy_ggdag, node_size = 14) +
-  theme(legend.position = "bottom")  + theme_dag_blank()
- 
-# See: https://ggdag.malco.io/articles/bias-structures.html
-
-
-y_effect(x = "Psycho", y = "Diabetes", a = "Income during Childhood", 
-       b = "Genetic Risk \nfor Diabetes", m = "Mother's Diabetes") %>% 
-  ggdag(use_labels = "label")
-
-
-
-## Try mediation
-
-dag0 <- collider_triangle(x = "Years", 
-                  y = "Success", 
-                  m = "Pscyhopath") 
-
-
-ggdag(dag0, text = FALSE, use_labels = "label")
-
-
-
+## Load Data
 ```{r}
+# load data and copy
+library(rethinking)
+data(WaffleDivorce)
+d <- WaffleDivorce
 
-dagify(
-  Success ~ Psycho + Age + Male + Edu + JobTime + Years,
-  Psycho ~ Male,
-  JobTime ~ Age + Years,
-  Edu ~ Years,
-  labels = c(
-    "Psycho" = "Psychopathy",
-    "Success" = "Success",
-    "Age" = "Age",
-    "Male" = "Male",
-    "Edu" = "Edu",
-    "JobTime" = "JobTime",
-    "Years" = "Years"
-  )
-) %>%
-  ggdag_dseparated(
-    from = "Years",
-    to = "Success",
-    controlling_for = c( "Psycho",  "Age",  "Male",  "Edu" , "JobTime"), 
-    text = FALSE,
-    use_labels = "label"
-  ) + theme_dag_blank()
-
+# standardize variables
+d$D <- standardize( d$Divorce )
+d$M <- standardize( d$Marriage )
+d$A <- standardize( d$MedianAgeMarriage )
 ```
 
+## Single regressions
+
+```{r cache = TRUE}
+m5.1 <- quap(
+  alist(
+    D ~ dnorm( mu , sigma ) ,
+    mu <- a + bA * A ,
+    a ~ dnorm( 0 , 0.2 ) ,
+    bA ~ dnorm( 0 , 0.5 ) ,
+    sigma ~ dexp( 1 )
+    ) , data = d )
+precis(m5.1)
+```
+
+
+## Single regression with marriage rate
+
+
+```{r cache =TRUE}
+m5.2 <- quap(
+  alist(
+    D ~ dnorm( mu , sigma ) ,
+    mu <- a + bM * M ,
+    a ~ dnorm( 0 , 0.2 ) ,
+    bM ~ dnorm( 0 , 0.5 ) ,
+    sigma ~ dexp( 1 )
+) , data = d )
+
+precis(m5.2)
+```
+
+## Thinks before you regress!
+Only one predictor has a causal effect.
+
+```{r}
+# possible dags
+library(dagitty)
+library(ggdag)
 dagify(
-  Success ~ Psycho + Age + Male + Edu + JobTime + Years,
-  Psycho ~ Male,
-  JobTime ~ Age + Years,
-  Edu ~ Years,
-  labels = c(
-    "Psycho" = "Psychopathy",
-    "Success" = "Success",
-    "Age" = "Age",
-    "Male" = "Male",
-    "Edu" = "Edu",
-    "JobTime" = "JobTime",
-    "Years" = "Years"
-  )
+  D  ~ A,
+  M ~ A
 ) %>%
-  ggdag_dseparated(
-    from = "Years",
-    to = "Success",
-    controlling_for = c( "Psycho",  "Age",  "Male",  "Edu" , "JobTime"), 
-    text = FALSE,
-    use_labels = "label"
-  ) + theme_dag_blank()
+  ggdag() +
+  theme_dag_blank()
+```
+ 
+## Another possible DAG
+
+```{r}
+dagify(D ~ A + M,
+       M ~ A) %>% 
+  ggdag() +
+  theme_dag_blank()
+```
+
+## Implied conditional independence
+
+```{r}
+library(dagitty)
+DMA_dag2 <- dagitty('dag{ D <- A -> M }')
+impliedConditionalIndependencies( DMA_dag2 )
+```
+
+D $\perp$ M $|$ A
+
+
+## Multiple regression
+
+```{r}
+m5.3 <- quap(
+  alist(
+    D ~ dnorm( mu , sigma ) ,
+    mu <- a + bM*M + bA*A ,
+    a ~ dnorm( 0 , 0.2 ) ,
+    bM ~ dnorm( 0 , 0.5 ) ,
+    bA ~ dnorm( 0 , 0.5 ) ,
+    sigma ~ dexp( 1 )
+    ) , data = d )
+plot( coeftab(m5.1,m5.2, m5.3), par=c("bA","bM") )
+```
+
+## Simulate Divorce example
+
+```{r cache = TRUE}
+library(brms)
+library(sjPlot)
+N <- 500 # number of simulated States
+age <- rnorm( N )# sim A
+mar <- rnorm( N , -age ) # sim A -> M”
+div <- rnorm( N ,  age ) # sim A -> D”
+#create data frame
+nd<-cbind(age,mar,div)
+#run models in brms
+b1<- brms::brm(div ~ age, data = nd)
+b2 <- brms::brm(div ~ mar, data = nd)
+b3 <- brms::brm(div ~ age + mar, data = nd)
+
+bayesplot::mcmc_intervals(b3,pars = c("b_age", "b_mar"))
+```
+
+## Masked Relationships
+
+
+
+
 
