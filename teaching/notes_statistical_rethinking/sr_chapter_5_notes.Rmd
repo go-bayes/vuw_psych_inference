@@ -8,7 +8,7 @@ output:
     incremental: no
    # mathjax: local
     self_contained: false
-    widescreen: yes
+    widescreen: no
     smaller: yes
     font_adjustment: -5
     css: extra.css
@@ -121,7 +121,7 @@ D $\perp$ M $|$ A
 
 ## Multiple regression
 
-```{r}
+```{r echo = FALSE}
 m5.3 <- quap(
   alist(
     D ~ dnorm( mu , sigma ) ,
@@ -136,7 +136,7 @@ plot( coeftab(m5.1,m5.2, m5.3), par=c("bA","bM") )
 
 ## Simulate Divorce example
 
-```{r cache = TRUE}
+```{r cache = TRUE, echo = FALSE}
 library(brms)
 library(sjPlot)
 N <- 500 # number of simulated States
@@ -155,7 +155,39 @@ bayesplot::mcmc_intervals(b3,pars = c("b_age", "b_mar"))
 
 ## Masked Relationships
 
+```{r, echo = FALSE}
+library(ggdag)
+library(patchwork)
+p1 <- dagify(
+  N  ~ M,
+  K ~ N + M
+) %>%
+  ggdag() +
+  theme_dag_blank()
 
+p2 <- dagify(
+  M  ~ N,
+  K ~ N + M
+) %>%
+  ggdag() +
+  theme_dag_blank()
+
+
+p3<- dagify(
+  K ~ N + M,
+  N ~ U,
+  M ~ U
+) %>%
+  ggdag() +
+  theme_dag_blank()
+p1 + p2 + p3 + plot_annotation(title = "DAGS are equivalent, can't infer relationships", tag_levels = 'a')
+```
+
+
+
+## 
+
+> "Whenever an article or book says something like "we found no difference" or "no effect," this usually means that some parameter was not significantly different from zero, and so the authors adopted zero as the estimate. This is both illogical and extremely common." -- SR, p. 241
 
 
 
