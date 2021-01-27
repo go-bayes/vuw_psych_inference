@@ -21,7 +21,7 @@ editor_options:
 ```{r global_options,  include = FALSE}
 knitr::opts_chunk$set(message=FALSE, 
                       warning=FALSE,
-                      collapse =TRUE,
+                      colmlapse =TRUE,
                       echo=TRUE)
                       #results="hide", 
                      # fig.width = 10,
@@ -185,9 +185,34 @@ p1 + p2 + p3 + plot_annotation(title = "DAGS are equivalent, can't infer relatio
 
 
 
-## 
+## Quote
 
 > "Whenever an article or book says something like "we found no difference" or "no effect," this usually means that some parameter was not significantly different from zero, and so the authors adopted zero as the estimate. This is both illogical and extremely common." -- SR, p. 241
+
+
+
+## Next week collider bias
+
+```{r}
+ggdag_collider_triangle(
+  x = NULL,
+  y = NULL,
+  m = NULL,
+  x_y_associated = FALSE,
+  edge_type = "link_arc",
+  node_size = 16,
+  text_size = 3.88,
+  label_size = text_size,
+  text_col = "white",
+  label_col = text_col,
+  node = TRUE,
+  stylized = FALSE,
+  text = TRUE,
+  use_labels = NULL
+)
+
+```
+
 
 
 
