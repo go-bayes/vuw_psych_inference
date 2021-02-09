@@ -18,26 +18,41 @@ editor_options:
 ---
 
 
-```{r global_options,  include = FALSE}
-knitr::opts_chunk$set(message=FALSE, 
-                      warning=FALSE,
-                      colmlapse =TRUE,
-                      echo=TRUE)
-                      #results="hide", 
-                     # fig.width = 10,
-                     # fig.height=8)
-# read libraries
+
+```{r setup, include=FALSE}
+# Packages
+library(scales)
+library(here)
+library(knitr)
+library(kableExtra)
+library(ggdist)
+library(bayesplot)
+library(tidyverse)
+library(rethinking)
+# knitr chunk options
+opts_chunk$set(
+  echo = FALSE, 
+  cache = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  dev = "svg",
+  fig.align = 'center'
+  )
+# Bayesplot color theme
+color_scheme_set("darkgray")
 ```
-```{r sourcelibraries, include=FALSE}
-source("libs.R")
-#source("funs.R") # custom functions for analysis
-```
+
+<!-- ```{r embed-xaringan, layout="l-body-outset"} -->
+<!-- xaringanExtra::embed_xaringan(url = "slides.html", ratio = "4:3") -->
+<!-- ``` -->
+
 
 ## Multiple regression, why? 
 
 1. "control" i.e. confounding
 2. complex causation (mediation)
 3. interactions -- importance of one var depends on another var
+
 
 
 ## Load Data
@@ -102,11 +117,15 @@ dagify(
 ## Another possible DAG
 
 ```{r}
-dagify(D ~ A + M,
+p2<-dagify(D ~ A + M,
        M ~ A) %>% 
   ggdag() +
   theme_dag_blank()
+p2
 ```
+
+##
+
 
 ## Implied conditional independence
 
@@ -158,26 +177,21 @@ bayesplot::mcmc_intervals(b3,pars = c("b_age", "b_mar"))
 ```{r, echo = FALSE}
 library(ggdag)
 library(patchwork)
-p1 <- dagify(
-  N  ~ M,
-  K ~ N + M
-) %>%
+
+p1 <- dagify(N  ~ M,
+             K ~ N + M) %>%
   ggdag() +
   theme_dag_blank()
 
-p2 <- dagify(
-  M  ~ N,
-  K ~ N + M
-) %>%
+p2 <- dagify(M  ~ N,
+             K ~ N + M) %>%
   ggdag() +
   theme_dag_blank()
 
 
-p3<- dagify(
-  K ~ N + M,
-  N ~ U,
-  M ~ U
-) %>%
+p3 <- dagify(K ~ N + M,
+             N ~ U,
+             M ~ U) %>%
   ggdag() +
   theme_dag_blank()
 p1 + p2 + p3 + plot_annotation(title = "DAGS are equivalent, can't infer relationships", tag_levels = 'a')
@@ -217,9 +231,11 @@ ggdag_collider_triangle(
 ##
 
 
-```{r  dag, fig.cap = " A causal graph (DAG) reveals lurking confounders in the the indicators.Were we to include all variables this would lead to collider confounding. means that we must take care when selecting variables for inclusion in our statistical model.", cache = TRUE, include = FALSE}
+```{r  dag, fig.cap = " A causal graph (DAG) reveals lurking confounders in the the indicators.Were we to include all variables this would lead to collider confounding. means that we must take care when selecting variables for inclusion in our statistical model.", cache = TRUE, echo = FALSE}
 # dag
-dj <- dagify(
+library(tidyverse)
+library(ggdag)
+dj <- ggdag::dagify(
   k6  ~  cv + ft + ml + sp + a  + w + sl + mal,
   w ~ cv + a + mal,
   sp  ~ cv  + w + mal,
@@ -261,26 +277,17 @@ colliders <- ggdag::ggdag_collider(
   text = FALSE,
   use_labels = "label"
 ) +   theme_dag_blank() + labs(title = "Lurking collider counfounders")
+```
+##
 
-stratALL <- ggdag_drelationship(
-  dj,
-  from = "cv",
-  to = "k6",
-  controlling_for = c("ft",
-                      "ml",
-                      "sp",
-                      "sl",
-                      "ft",
-                      "a",
-                      "w",
-                      "mal",
-                      "rl"),
-  collider_lines = TRUE,
-  text = FALSE,
-  use_labels = "label"
-) + theme_dag_blank() + labs(title = "Including all variables leads  to confounding")
+```{r}
+colliders
+```
 
-stratML <- ggdag_drelationship(
+##
+
+```{r}
+stratML <- ggdag::ggdag_drelationship(
   dj,
   from = "cv",
   to = "k6",
@@ -289,26 +296,20 @@ stratML <- ggdag_drelationship(
   text = FALSE,
   use_labels = "label"
 ) + theme_dag_blank()
-
-colliders
 ```
-##
-
-```{r}
-stratALL
-```
-
-##
-
-```{r flow, fig.cap="meaning_on_religion",include = FALSE}
-library("here")
-knitr::include_graphics("/Users/jbul176/GIT/vuw_psych_inference/teaching/images/meanng_on_religion.png")
-#knitr::include_graphics(here("/images/eqdag"))
-```
-
 
 ##
 ```{r}
-knitr::include_graphics("/Users/jbul176/GIT/vuw_psych_inference/teaching/images/nzavs_covid_timeline.png")
+stratML
 ```
+
+## Religion on meaning
+
+
+
+
+<!-- ```{r} -->
+<!-- library(here) -->
+<!-- knitr::include_graphics(here("teaching/images/c.jpg")) -->
+<!-- ``` -->
 
