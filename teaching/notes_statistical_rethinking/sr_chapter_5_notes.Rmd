@@ -231,72 +231,21 @@ ggdag_collider_triangle(
 ##
 
 
-```{r  dag, fig.cap = " A causal graph (DAG) reveals lurking confounders in the the indicators.Were we to include all variables this would lead to collider confounding. means that we must take care when selecting variables for inclusion in our statistical model.", cache = TRUE, echo = FALSE}
-# dag
-library(tidyverse)
+## Collider confounder
+
+```{r}
 library(ggdag)
-dj <- ggdag::dagify(
-  k6  ~  cv + ft + ml + sp + a  + w + sl + mal,
-  w ~ cv + a + mal,
-  sp  ~ cv  + w + mal,
-  ft ~ cv + sl + w,
-  ml ~  rl + w,
-  rl ~ a + mal,
-  sl ~ cv + a,
-  labels = c(
-    "k6" = "Kessler 6 Distress",
-    "ft" = "Fatigue",
-    "ml" = "Meaning in Life",
-    "a" = "Age",
-    "cv" = "Covid Timeline",
-    "sl" = "Sleep hours",
-    "sp" = "Relationship Satisfaction",
-    "w" = "Work hours",
-    "rl" = "Religion",
-    "mal" = "Male"
-  ),
-  exposure =  "cv",
-  outcome =   "k6"
-) %>%
-  tidy_dagitty()
-colliders <- ggdag::ggdag_collider(
-  dj,
-  from = "cv",
-  to = "k6",
-  control_for(c(
-    "ft",
-    "ml",
-    "sp",
-    "sl",
-    "ft",
-    "a",
-    "w",
-    "mal",
-    "rl"
-  )),
-  text = FALSE,
-  use_labels = "label"
-) +   theme_dag_blank() + labs(title = "Lurking collider counfounders")
-```
-##
-
-```{r}
-colliders
+confounder_triangle(x = "Age", y = "Happiness", z = "Marriage") %>% 
+  ggdag_dconnected(text = FALSE, use_labels = "label") + theme_dag_blank()
 ```
 
 ##
 
 ```{r}
-stratML <- ggdag::ggdag_drelationship(
-  dj,
-  from = "cv",
-  to = "k6",
-  controlling_for = c("ml","rl"),
-  collider_lines = TRUE,
-  text = FALSE,
-  use_labels = "label"
-) + theme_dag_blank()
+collider_triangle() %>% 
+  ggdag_dseparated(controlling_for = "m")+ theme_dag_blank()
 ```
+
 
 ##
 ```{r}

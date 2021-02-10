@@ -1,0 +1,256 @@
+---
+title: "Statistical Rethinking | Chapter 6"
+author: "Joseph Bulbulia"
+date: "10/01/2021"
+
+output:
+  ioslides_presentation:
+    incremental: no
+   # mathjax: local
+    self_contained: false
+    widescreen: yes
+    smaller: yes
+    font_adjustment: -5
+editor_options: 
+    markdown: 
+    wrap: 72
+---
+
+
+
+```{r setup, include=FALSE}
+# Packages
+library(scales)
+library(here)
+library(knitr)
+library(kableExtra)
+library(ggdist)
+library(bayesplot)
+library(tidyverse)
+library(rethinking)
+# knitr chunk options
+opts_chunk$set(
+  echo = FALSE, 
+  cache = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  dev = "svg",
+  fig.align = 'center'
+  )
+# Bayesplot color theme
+color_scheme_set("darkgray")
+```
+
+
+
+## Selection distortion effect
+```{r out.width = "750px"}
+knitr::include_graphics(here("teaching/notes_statistical_rethinking/sd.jpg")) 
+```
+
+## Confounding: the fork
+
+```{r}
+dagify(x  ~ z,
+             y  ~  z) %>%
+  ggdag() +
+  theme_dag_blank()
+```
+
+
+
+## Confounding: the pipe
+
+```{r}
+dagify(z ~ x,
+       y  ~ z) %>%
+  ggdag() +
+  theme_dag_blank()
+```
+
+
+## Post treatment bias
+
+```{r}
+dagify(h2 ~ h1,
+       h2  ~  Fg,
+       Fg ~ Tr) %>%
+  ggdag() +
+  theme_dag_blank()
+```
+
+
+## Post treatment bias can fooling you into thinking the treatment works
+
+
+```{r}
+dagify(h2 ~ h1,
+       Fg  ~  Tr,
+       Fg ~ U,
+       h2 ~ U) %>%
+  ggdag() +
+  theme_dag_blank()
+```
+
+
+
+## Counfounding: the Collider
+
+
+```{r}
+library(ggdag)
+library(dagitty)
+confounder_triangle(x = "Age", y = "Happiness", z = "Marriage") %>%
+  ggdag_dconnected(text = FALSE, use_labels = "label") + theme_dag_blank()
+```
+
+##  Collider confounding
+
+```{r}
+collider_triangle() %>%
+  ggdag_dseparated(controlling_for = "m") + theme_dag_blank()
+```
+
+
+
+## Unmeasured causes can reverse signs
+
+
+```{r}
+dagify(p ~ g + U,
+       c  ~  p + g + U) %>%
+  ggdag() +
+  theme_dag_blank()
+```
+
+
+## Confounding: the descendent 
+
+```{r}
+dagify(z ~ x + y,
+       d ~ z) %>%
+  ggdag() +
+  theme_dag_blank()
+```
+
+
+## Rules for avoiding confounding
+
+1. List all of the paths connecting X (the potential cause of interest) and Y (the outcome).
+2. Classify each path by whether it is open or closed. A path is open unless it contains a collider.
+3. Classify each path by whether it is a backdoor path. A backdoor path has an arrow entering X.
+4. If there are any open backdoor paths, decide which variable(s) to condition on to close it (if possible).
+
+- McElreath, “Statistical Rethinking.” p.285 
+
+** DO NOT OPEN A PATH IF IT IS CLOSED ** 
+
+
+
+## Waffle House: w-->d 
+
+```{r}
+library(dagitty)
+dg <-dagify(d ~ a,
+       d ~ m,
+       m ~ a, 
+       a ~ s, 
+       m ~ s,
+       w ~ s, 
+       d ~ w,
+  exposure =  "w",
+  outcome =   "d") %>%
+  tidy_dagitty()
+dg %>%
+  ggdag() +
+  theme_dag_blank()
+
+```
+
+
+##  W --> D
+
+
+```{r}
+ggdag::ggdag_adjustment_set(dg, node_size = 14) +
+  theme(legend.position = "bottom") + theme_dag_blank()
+```
+
+## Any Colliders? 
+
+## 
+
+```{r }
+#Colliders
+ggdag::ggdag_collider(dg,
+                      from = "w",
+                      to = "d") +   theme_dag_blank()
+```
+
+
+## Example from my work: how did a Covid lockdown affect distress? 
+
+
+```{r ccv, out.width = "750px"}
+knitr::include_graphics(here("teaching/notes_statistical_rethinking/cvd.png")) 
+```
+
+## You might think, I must add "controls"
+
+- age
+- male
+- income
+- partner
+- sleep
+- religion
+- meaning in life
+- rested
+- edu $\dots$
+
+```{r}
+tidy_k6 <- dagify(
+  k6  ~ covid + mean + rel + male + income + age + rest + sleep + partn,
+  mean ~ rel + male  + age + rest,
+  rel ~ age  + male,
+  income ~ edu + covid,
+  rest ~ covid + age,
+  sleep ~ covid + age,
+  partn ~ age + income + rest,
+  exposure =  "rel",
+  outcome =   "k6"
+) %>%
+  tidy_dagitty()
+```
+
+
+
+##  The GGDAG package will find colliders
+
+```{r }
+#Colliders
+ggdag::ggdag_collider(tidy_k6,
+                      from = "covid",
+                      to = "k6") +   theme_dag_blank()
+```
+
+## The adjustment set command tells you which variables to include condition 
+
+```{r }
+# graph adjustment sets
+ggdag::ggdag_adjustment_set(tidy_k6, node_size = 14) +
+  theme(legend.position = "bottom") + theme_dag_blank()
+```
+
+
+## What if you adopt a causal salad approach? 
+```{r}
+ggdag_drelationship(
+  tidy_k6,
+  from = "covid",
+  to = "k6",
+  controlling_for = c("male", "age", "sleep", "income", "mean", "rel"),
+  collider_lines = TRUE
+) + theme_dag_blank()
+```
+
+
