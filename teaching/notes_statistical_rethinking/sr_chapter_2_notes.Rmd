@@ -74,7 +74,7 @@ We can plot this object:
 
 
 ```{r}
-plot( p_grid , posterior , type="b",
+plot( p_grid , posterior , type= "b",
        xlab= "probability of water", 
        ylab="posterior probability")
 ```
@@ -83,10 +83,13 @@ plot( p_grid , posterior , type="b",
 Not in the book. Consider what happens if we adjust our priors:
 
 ```{r}
-# here we take any value under five and we assign it a zero for our prior. We know that the world is at least half water
+# Here we take any value under five and we assign it a zero for our prior. We know that the world is at least half water
+
 prior <- ifelse( p_grid < 0.5 , 0 , 1)
 
-prior <- exp( -5*abs( p_grid - 0.5 ) ) # Here "abs is absolute value"  and constraining the values to be lower than 1, bust softer than an absolute cutoff at .5
+prior <- exp( -5*abs( p_grid - 0.5 ) ) 
+
+# Here "abs is absolute value" and constraining the values to be lower than 1, bust softer than an absolute cutoff at .5
 
 # next replot
 unstd.posterior <- likelihood * prior  # we're taking the likelihood at face value.
