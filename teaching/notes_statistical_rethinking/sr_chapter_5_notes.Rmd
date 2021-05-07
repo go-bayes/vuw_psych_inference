@@ -247,10 +247,6 @@ collider_triangle() %>%
 ```
 
 
-##
-```{r}
-stratML
-```
 
 ## Religion on meaning
 
